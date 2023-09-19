@@ -1,10 +1,11 @@
 import { Button } from "./components/ui/button";
-import { FileVideo, Github, Upload, Wand2 } from "lucide-react"
+import { Github, Wand2 } from "lucide-react"
 import { Separator } from "./components/ui/separator";
 import { Textarea } from "./components/ui/textarea";
 import { Label } from "./components/ui/label";
 import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "./components/ui/select";
 import { Slider } from "./components/ui/slider";
+import VideoInputForm from "./components/video-imput-form";
 
 
 export function App() {
@@ -42,37 +43,7 @@ export function App() {
               </div>
 
               <aside className="w-80 space-y-6">
-                <form className="space-y-6">
-                  <label
-                    htmlFor="video"
-                    className="flex border rounded-md aspect-video cursor-pointer text-sm flex-col gap-2 items-center justify-center text-muted-foreground hover:bg-primary/5"
-                  >
-                    <FileVideo className="w-5 h-5"/>
-                    Selecione um video
-                  </label>
-
-                  <input
-                    type="file"
-                    name=""
-                    id="video"
-                    accept="video/mp4"
-                    className="sr-only"
-                  />
-                   <Separator />
-                   <div className="space-y-2">
-                    <Label htmlFor="transcription_prompt">Prompt of transcription</Label>
-                    <Textarea
-                      id="transcription_prompt"
-                      className="h-20 leading-relaxed resize-none"
-                      placeholder="inclua palavras chaves mencionada no video separadas por virgulas ( , )"
-                    />
-                   </div>
-                   <Button type="submit" className="w-full">
-                    carregar video
-                    <Upload className="w-4 h-4 ml-2 " />
-
-                   </Button>
-                </form>
+                <VideoInputForm/>
 
                 <Separator />
                 <form className="space-y-6">
