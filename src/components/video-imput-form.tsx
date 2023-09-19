@@ -9,9 +9,20 @@ import { loadFFmpeg } from '@/lib/ffmpeg'
 import { fetchFile } from '@ffmpeg/util'
 import { api } from '@/lib/axios'
 
+type Status = 'error'| 'waiting' | 'converting' | 'uploading' | 'generating' | 'success'
+
+const statusMessage = {
+  converting: "Convertendo...",
+  generating: "Transcrevendo...",
+  uploading: "Carregando mp3",
+  success : "Sucesso!",
+
+  error: "Error",
+}
 
 export default function VideoInputForm() {
   const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [ status, setStatus] = useState<Status>("waiting")
   const prompInpuRef = useRef<HTMLTextAreaElement>(null)
 
   function handleFileSelectd(e: ChangeEvent<HTMLInputElement>){
@@ -74,20 +85,22 @@ export default function VideoInputForm() {
       return
     }
 
+    setStatus('converting')
     const audioFile = await convertVideoToAudio(videoFile)
 
     const data = new FormData()
     data.append('file', audioFile)
 
+    setStatus('uploading')
     const response = await api.post('/videos', data)
     const videoId = response.data.video.id
 
-    // ocalhost:3333/videos/58251537-59fc-4371-8700-400712d8903b/transcription
+    setStatus('generating')
     await api.post(`/videos/${videoId}/transcription`, {
       prompt,
     })
 
-    console.log("meu arquico chegou e finalizou")
+    setStatus('success')
   }
 
   const previeURL = useMemo(()=> {
@@ -134,14 +147,26 @@ export default function VideoInputForm() {
         <Label htmlFor="transcription_prompt">Prompt of transcription</Label>
         <Textarea
           ref={prompInpuRef}
+          disabled={ status !== 'waiting' }
           id="transcription_prompt"
           className="h-20 leading-relaxed resize-none"
           placeholder="inclua palavras chaves mencionada no video separadas por virgulas ( , )"
         />
         </div>
-        <Button type="submit" className="w-full">
-        carregar video
-        <Upload className="w-4 h-4 ml-2 " />
+        <Button
+          data-success={status === "success"}
+          type="submit"
+          className="w-full data-[success=true]:bg-emerald-600"
+          disabled={ status !== 'waiting' }
+        >
+          { status === 'waiting' ? (
+              <>
+                carregar video
+                <Upload className="w-4 h-4 ml-2 " />
+              </>
+            )
+            : statusMessage[status]
+          }
 
         </Button>
     </form>
