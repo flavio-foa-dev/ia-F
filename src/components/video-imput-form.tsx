@@ -12,7 +12,7 @@ import { api } from '@/lib/axios'
 
 export default function VideoInputForm() {
   const [videoFile, setVideoFile] = useState<File | null>(null)
-  const prompInpuRef = useRef<HTMLTextAreaElement | null>(null)
+  const prompInpuRef = useRef<HTMLTextAreaElement>(null)
 
   function handleFileSelectd(e: ChangeEvent<HTMLInputElement>){
     const { files } = e.currentTarget
@@ -80,8 +80,14 @@ export default function VideoInputForm() {
     data.append('file', audioFile)
 
     const response = await api.post('/videos', data)
+    const videoId = response.data.video.id
 
-    console.log("meu arquico chegou",response.data)
+    // ocalhost:3333/videos/58251537-59fc-4371-8700-400712d8903b/transcription
+    await api.post(`/videos/${videoId}/transcription`, {
+      prompt,
+    })
+
+    console.log("meu arquico chegou e finalizou")
   }
 
   const previeURL = useMemo(()=> {
