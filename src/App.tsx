@@ -3,19 +3,40 @@ import { Github, Wand2 } from "lucide-react"
 import { Separator } from "./components/ui/separator";
 import { Textarea } from "./components/ui/textarea";
 import { Label } from "./components/ui/label";
-import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "./components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
 import { Slider } from "./components/ui/slider";
 import VideoInputForm from "./components/video-imput-form";
 import PromptSelect from "./components/prompt-select";
 import { useState } from "react";
+import {useCompletion} from "ai/react"
 
 
 export function App() {
   const [ temperature, setTemperature ] = useState(0.5)
+  const [videoId, setVideoId] = useState<string | null>(null)
 
-  function handlePromptSelect(template: string){
-    console.log(template);
-  }
+  // function handlePromptSelect(template: string){
+  //   console.log(template);
+  // }
+
+  const {
+    input,
+    setInput,
+    handleInputChange,
+    handleSubmit,
+    completion,
+    isLoading
+
+  } = useCompletion({
+    api: 'http://localhost:3333/ai/complete',
+    body:{
+      videoId,
+      temperature,
+    },
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
 
   return (
     <>
@@ -37,11 +58,14 @@ export function App() {
               <Textarea
                 className="resize-none p-4 leading-relaxed"
                 placeholder="inclua o prompt para IA..."
+                value={input}
+                onChange={handleInputChange}
                 />
               <Textarea
                 className="resize-none p-4 leading-relaxed"
                 placeholder="Resultado gerado pela IA..."
                 readOnly
+                value={!completion? "You exceeded your current quota, please check your plan and billing details.": completion }
               />
             </div>
             <p
@@ -51,12 +75,12 @@ export function App() {
             </p>
           </div>
           <aside className="w-80 space-y-6">
-            <VideoInputForm/>
+            <VideoInputForm onVideoUploaded={setVideoId}/>
             <Separator />
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div className=" space-y-2">
                 <Label>Prompt</Label>
-                <PromptSelect onPromptSelect={handlePromptSelect}/>
+                <PromptSelect onPromptSelect={setInput}/>
               </div>
               <div className=" space-y-2">
                 <Label>Modelo</Label>
@@ -85,7 +109,7 @@ export function App() {
                 </span>
               </div>
               <Separator />
-              <Button type="submit" className=" w-full">
+              <Button disabled={isLoading} type="submit" className=" w-full">
                 Executar
                 <Wand2 className="w-4 h-4 ml-2 "/>
               </Button>
